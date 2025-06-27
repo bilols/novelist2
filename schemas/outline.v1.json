@@ -1,27 +1,34 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Novelist Outline v1",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Novel Outline",
   "type": "object",
-  "required": ["title", "premise", "novel_target_words", "chapters"],
+  "required": ["title", "chapters"],
   "properties": {
-    "title": { "type": "string", "minLength": 1 },
-    "premise": { "type": "string", "minLength": 10 },
-    "genre": { "type": "string" },
-    "novel_target_words": { "type": "integer", "minimum": 1000 },
+    "title": { "type": "string" },
+    "novel_target_words": { "type": "integer", "minimum": 10000 },
+    "themes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 2 },
+      "minItems": 1
+    },
     "chapters": {
       "type": "array",
+      "minItems": 3,
       "items": {
         "type": "object",
-        "required": ["num", "title", "target_words", "summary"],
+        "required": ["num", "title", "target_words", "beats"],
         "properties": {
           "num": { "type": "integer", "minimum": 1 },
           "title": { "type": "string" },
-          "target_words": { "type": "integer", "minimum": 250 },
-          "summary": { "type": "string", "minLength": 20 }
+          "summary": { "type": "string" },
+          "target_words": { "type": "integer", "minimum": 500 },
+          "beats": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 3 },
+            "minItems": 3
+          }
         }
       }
-    },
-    "prologue": { "$ref": "#/properties/chapters/items" },
-    "epilogue": { "$ref": "#/properties/chapters/items" }
+    }
   }
 }

@@ -13,14 +13,29 @@ export default function Dashboard({ pid }) {
   useEffect(load, [pid]);
 
   const regen = n =>
-    axios.post(`/projects/${pid}/chapters/${n}/regenerate`).then(load);
+    axios
+      .post(`/projects/${pid}/chapters/${n}/regenerate`)
+      .then(r => pollTask(r.data.task_id));
+
+  const pollTask = taskId => {
+    const int = setInterval(() => {
+      axios.get(`/tasks/${taskId}`).then(r => {
+        if (r.data.ready) {
+          clearInterval(int);
+          load();
+        }
+      });
+    }, 1500);
+  };
 
   const fetchThemes = () =>
     axios.get(`/projects/${pid}/themes`).then(r => setThemes(r.data));
 
   return (
     <div style={{ marginTop: 20 }}>
-      <h3>Cost so far: ${cost ? cost.usd : "—"}</h3>
+      <h3>
+        Cost so far: {cost ? `$${cost.usd}` : "—"} ({cost ? cost.tokens : "—"} tokens)
+      </h3>
       <h2>Chapters</h2>
       <table border="1" cellPadding="6">
         <thead>
@@ -36,7 +51,7 @@ export default function Dashboard({ pid }) {
             <tr key={ch.num}>
               <td>{ch.num}</td>
               <td>{ch.exists ? "✓" : "—"}</td>
-              <td style={{ color: "red" }}>
+              <td style={{ color: ch.report && ch.report.missing.length ? "red" : "inherit" }}>
                 {ch.report && ch.report.missing.length
                   ? ch.report.missing.join("; ")
                   : ""}
