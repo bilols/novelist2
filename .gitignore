@@ -1,0 +1,70 @@
+# ─────────────────────────────────────────────────────────────
+# Core language / toolchain
+# ─────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.egg-info/
+*.dist-info/
+
+# Poetry / venv
+.venv/
+# If you use the older poetry‑generated name:
+novelist2-*-py3.*/
+
+# Node / Vite
+frontend/node_modules/
+frontend/.cache/
+frontend/dist/
+*.log
+
+# Editors & IDEs
+.vscode/
+.idea/
+*.sw?
+*.suo
+*.user
+*.orig
+
+# macOS / Windows cruft
+.DS_Store
+Thumbs.db
+Icon?
+
+# ─────────────────────────────────────────────────────────────
+# Project‑specific generated data
+# ─────────────────────────────────────────────────────────────
+# Local novels created by the app
+NovelistProjects/
+
+# Celery / task logs
+logs/
+*.log
+
+# Reports & exports (generated)
+**/reports/
+**/chapters/
+**/summaries/
+**/marketing/
+**/drafts/
+*.epub
+*.docx
+
+# Built docs or coverage
+build/
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Pandoc / exporter temp
+*.aux
+*.out
+*.toc
+
+# ─────────────────────────────────────────────────────────────
+# Secrets
+# ─────────────────────────────────────────────────────────────
+.env
+*.key
+*.pem
