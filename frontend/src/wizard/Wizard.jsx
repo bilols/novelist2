@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import LiveConsole from "../components/LiveConsole";
 
 export default function Wizard({ onClose }) {
   const [step, setStep] = useState(1);
@@ -11,43 +12,51 @@ export default function Wizard({ onClose }) {
     themes: "",
     genre: ""
   });
-  const [taskId, setTask] = useState(null);
+  const [taskId, setTaskId] = useState(null);
 
   const next = () => setStep(s => s + 1);
   const prev = () => setStep(s => s - 1);
 
-  const submit = () => {
+  const launch = () => {
     const payload = {
       ...form,
-      themes: form.themes.split(",").map(s => s.trim()).filter(Boolean)
+      themes: form.themes.split(",").map(t => t.trim()).filter(Boolean)
     };
     axios.post("/wizard", payload).then(r => {
-      setTask(r.data.task_id);
+      setTaskId(r.data.task_id);
       next();
     });
   };
+
+  const label = { display: "block", marginTop: 8 };
 
   return (
     <div style={{ border: "1px solid gray", padding: 20, marginTop: 20 }}>
       {step === 1 && (
         <>
-          <h3>Step 1 – Basic info</h3>
-          <input
-            placeholder="Title"
-            value={form.title}
-            onChange={e => setForm({ ...form, title: e.target.value })}
-          />
-          <input
-            placeholder="Author"
-            value={form.author}
-            onChange={e => setForm({ ...form, author: e.target.value })}
-          />
-          <textarea
-            placeholder="Premise"
-            value={form.premise}
-            onChange={e => setForm({ ...form, premise: e.target.value })}
-            rows={3}
-          />
+          <h3>Step 1 – Basic Info</h3>
+          <label style={label}>
+            Title
+            <input
+              value={form.title}
+              onChange={e => setForm({ ...form, title: e.target.value })}
+            />
+          </label>
+          <label style={label}>
+            Author
+            <input
+              value={form.author}
+              onChange={e => setForm({ ...form, author: e.target.value })}
+            />
+          </label>
+          <label style={label}>
+            Premise
+            <textarea
+              rows={3}
+              value={form.premise}
+              onChange={e => setForm({ ...form, premise: e.target.value })}
+            />
+          </label>
           <button onClick={next} disabled={!form.title || !form.premise}>
             Next
           </button>
@@ -56,26 +65,32 @@ export default function Wizard({ onClose }) {
 
       {step === 2 && (
         <>
-          <h3>Step 2 – Targets & Themes</h3>
-          <input
-            type="number"
-            value={form.words}
-            onChange={e => setForm({ ...form, words: e.target.value })}
-          />{" "}
-          total words
-          <input
-            placeholder="Genre"
-            value={form.genre}
-            onChange={e => setForm({ ...form, genre: e.target.value })}
-          />
-          <input
-            placeholder="Themes (comma‑sep)"
-            value={form.themes}
-            onChange={e => setForm({ ...form, themes: e.target.value })}
-          />
-          <div>
-            <button onClick={prev}>Back</button>
-            <button onClick={submit}>Launch Outline</button>
+          <h3>Step 2 – Targets & Themes</h3>
+          <label style={label}>
+            Total word count for novel
+            <input
+              type="number"
+              value={form.words}
+              onChange={e => setForm({ ...form, words: e.target.value })}
+            />
+          </label>
+          <label style={label}>
+            Genre
+            <input
+              value={form.genre}
+              onChange={e => setForm({ ...form, genre: e.target.value })}
+            />
+          </label>
+          <label style={label}>
+            Themes (comma‑separated)
+            <input
+              value={form.themes}
+              onChange={e => setForm({ ...form, themes: e.target.value })}
+            />
+          </label>
+          <div style={{ marginTop: 10 }}>
+            <button onClick={prev}>Back</button>{" "}
+            <button onClick={launch}>Launch Outline</button>
           </div>
         </>
       )}
@@ -83,11 +98,13 @@ export default function Wizard({ onClose }) {
       {step === 3 && (
         <>
           <h3>Generating outline…</h3>
-          <p>Task id: {taskId}</p>
+          <LiveConsole taskId={taskId} onDone={onClose} />
         </>
       )}
 
-      <button onClick={onClose}>Close</button>
+      <button onClick={onClose} style={{ marginTop: 15 }}>
+        Close
+      </button>
     </div>
   );
 }
