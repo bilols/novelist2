@@ -74,6 +74,12 @@ cd frontend
 npm i
 npm run dev    # http://localhost:5173/
 
+### 3.4 Wizard
+
+Open <http://localhost:5173/> → **Start New Novel**  
+Fill the two‑step form and click **Launch Outline**.  
+Progress appears; upon completion you’re redirected to the dashboard.
+
 ---
 
 ## 4  REST API Cheat‑Sheet

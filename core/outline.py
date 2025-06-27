@@ -1,66 +1,61 @@
-# v2025‑06‑27‑AI-generated
+# v2025‑07‑01‑AI-generated
 """
-core/outline.py
-Calls OpenAI with enforced JSON format and retries once if validation fails.
+core/outline.py  – robust outline generator with retries and cost logging
 """
-
 from __future__ import annotations
-
-import json
-import os
+import json, time
 from pathlib import Path
 from typing import Any
-
 import jsonschema
-import openai
-
-import core.env  # .env loader
-from core import projects as pj
+import core.env
+from core.openai_wrap import chat_completion
 from core.prompt_builders import outline_prompt
+from core import projects as pj
 
-SCHEMA_PATH = Path(__file__).with_suffix("").parent.parent / "schemas" / "outline.v1.json"
+SCHEMA = json.loads(
+    (Path(__file__).parent.parent / "schemas" / "outline.v1.json").read_text()
+)
 OUTLINE_FILE = "outline.json"
-
-with open(SCHEMA_PATH, encoding="utf-8") as fh:
-    _OUTLINE_SCHEMA = json.load(fh)
+MAX_RETRIES = 3
 
 
-def _validate(data: dict[str, Any]) -> None:
-    jsonschema.validate(data, _OUTLINE_SCHEMA)
+def _validate(obj: dict[str, Any]) -> None:
+    jsonschema.validate(obj, SCHEMA)
 
 
-def _call_openai(kwargs: dict) -> dict:
-    resp = openai.chat.completions.create(**kwargs)
-    return json.loads(resp.choices[0].message.content)
+def _call_openai(premise: str, genre: str | None, words: int) -> dict | None:
+    kwargs = outline_prompt(premise, genre, words)
+    resp = chat_completion(**kwargs)
+    try:
+        return json.loads(resp.choices[0].message.content)
+    except json.JSONDecodeError:
+        return None
 
 
 def generate_outline(pid: str, premise: str, genre: str | None, words: int) -> dict:
-    manifest = pj.load_manifest(pid)
     root = pj.NOVELIST_ROOT / pid
+    attempt = 0
+    outline: dict | None = None
+    explanation = ""
 
-    kwargs = outline_prompt(premise, genre, words)
+    while attempt < MAX_RETRIES:
+        attempt += 1
+        outline = _call_openai(premise, genre, words)
+        try:
+            _validate(outline)  # type: ignore[arg-type]
+            break
+        except Exception as e:
+            explanation = str(e)
+            outline = None
+            time.sleep(1)  # brief back‑off
 
-    # first try
-    outline = _call_openai(kwargs)
-    try:
-        _validate(outline)
-    except jsonschema.ValidationError:
-        # one retry – tell the model exactly what failed
-        kwargs["messages"].append(
-            {
-                "role": "system",
-                "content": "Previous JSON failed validation. Please return a corrected object.",
-            }
-        )
-        outline = _call_openai(kwargs)
-        _validate(outline)  # will raise if still bad
+    if outline is None:
+        raise RuntimeError(f"Failed to obtain valid outline after {MAX_RETRIES} tries.\n{explanation}")
 
-    # write to disk
     (root / OUTLINE_FILE).write_text(json.dumps(outline, indent=2), encoding="utf-8")
 
-    # update manifest
-    manifest["outline_status"] = "ready"
-    manifest["target_words"] = words
+    manifest = pj.load_manifest(pid)
+    manifest.update({"outline_status": "ready", "target_words": words})
     (root / pj.MANIFEST).write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
     return outline
