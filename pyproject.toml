@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "novelist2"
+version = "0.1.0"
+description = "Local web app for AI‑assisted novel writing"
+authors = ["Bill Olson <bilols@hotmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [
+  { include = "core" },
+  { include = "api"  },
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standard"], version = "^0.29.0"}
+pydantic = "^2.7"
+celery = "^5.4"
+redis = "^5.0"
+httpx = "^0.28.1"
+openai = "^1.88.0"
+python-dotenv = "^1.1.0"
+jsonschema = "^4.24.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4"
+black = "^24.4"
+ruff = "^0.4"
+mypy = "^1.10"
+
+[tool.poetry.scripts]
+novelist-web = "api.main:run"

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Novelist Outline v1",
+  "type": "object",
+  "required": ["title", "premise", "novel_target_words", "chapters"],
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "premise": { "type": "string", "minLength": 10 },
+    "genre": { "type": "string" },
+    "novel_target_words": { "type": "integer", "minimum": 1000 },
+    "chapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["num", "title", "target_words", "summary"],
+        "properties": {
+          "num": { "type": "integer", "minimum": 1 },
+          "title": { "type": "string" },
+          "target_words": { "type": "integer", "minimum": 250 },
+          "summary": { "type": "string", "minLength": 20 }
+        }
+      }
+    },
+    "prologue": { "$ref": "#/properties/chapters/items" },
+    "epilogue": { "$ref": "#/properties/chapters/items" }
+  }
+}
