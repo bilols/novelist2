@@ -1,6 +1,8 @@
 # Novelist 2.0 — Local AI‑Assisted Novel Writing Suite
 *Last updated 2025‑06‑28*
 
+No longer update -- early prototype and only for learning purposes.
+
 ```
 Root
 ├─ api/          FastAPI backend (Python 3.12)
